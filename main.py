@@ -1,3 +1,5 @@
+import sys
+
 from src.manager import Manager
 from src.models import Parameters
 
@@ -63,11 +65,32 @@ def display_tenants(manager):
                 print(f"      • {format_currency(transfer.amount_pln):>15}  Date: {transfer.date}  Period: {month_year}")
 
 
+def display_settlement(manager, apartment_key: str, year: int, month: int):
+    settlement = manager.get_settlement(apartment_key, year, month)
+    if settlement is None:
+        print(f"Apartment '{apartment_key}' not found.")
+        return
+
+    print_section_header(f"SETTLEMENT: {apartment_key} ({month}/{year})")
+    print(f"  Total due: {format_currency(settlement.total_due_pln)}")
+
+    tenants_settlements = manager.create_tenants_settlements(settlement)
+    print_subsection_header("Tenants Settlements")
+    for ts in tenants_settlements:
+        print(f"   • {ts.tenant}: {format_currency(ts.total_due_pln)}")
+
+
 if __name__ == '__main__':
     parameters = Parameters()
     manager = Manager(parameters)
 
-    display_apartments(manager)
-    display_tenants(manager)
-    
+    if len(sys.argv) == 4:
+        apartment_key = sys.argv[1]
+        year = int(sys.argv[2])
+        month = int(sys.argv[3])
+        display_settlement(manager, apartment_key, year, month)
+    else:
+        display_apartments(manager)
+        display_tenants(manager)
+
     print(f"\n{'=' * 70}\n")
