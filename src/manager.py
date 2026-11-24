@@ -70,5 +70,16 @@ class Manager:
                 total_due_pln=apartment_settlement.total_due_pln / len(tenants_in_apartment)
             )
         for tenant in tenants_in_apartment ] 
-    
-    
+
+    def get_tax(self, year: int, month: int, tax_rate: float) -> int:
+        if month < 1 or month > 12:
+            raise ValueError("Miesiąc ma być z zakresu 1-12")
+        if tax_rate < 0:
+            raise ValueError("Podatek nie może być liczbą ujemną")
+
+        total_income = 0.0
+        for transfer in self.transfers:
+            if transfer.settlement_year == year and transfer.settlement_month == month:
+                total_income += transfer.amount_pln
+
+        return round(total_income * tax_rate)
